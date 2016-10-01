@@ -135,16 +135,17 @@ def char3Move(char, myteam, enemyteam, target):
 
   if is_dodgeable_attack(char, enemyteam):
     action = get_dodge_action(char)
+    print action
   #logic goes here
   return action
 
 def get_dodge_action(char):
-    posbelow = posabove = posleft = posright = selectPosition = list(char.position)
-    print tuple(char.position)
-    posbelow[1] -= 1
-    posabove[1] += 1
-    posleft[0] -= 1
-    posright[0] += 1
+    selectPosition = None
+    print "From: %s" % (char.position,)
+    posbelow = tuple([char.position[0], char.position[1] - 1])
+    posabove = tuple([char.position[0], char.position[1] + 1])
+    posleft = tuple([char.position[0] - 1, char.position[1]])
+    posright = tuple([char.position[0] + 1, char.position[1]])
     if gameMap.is_inbounds(posbelow):
         selectPosition = posbelow
     elif gameMap.is_inbounds(posleft):
@@ -155,6 +156,7 @@ def get_dodge_action(char):
         selectPosition = posabove
 
     selectPosition = tuple(selectPosition)
+    print "To: %s" % (selectPosition,)
 
     return {"Action": "Move",
               "CharacterId": char.id,
@@ -165,16 +167,21 @@ def get_dodge_action(char):
 def is_dodgeable_attack(char, enemyteam):
     for enemy in enemyteam:
         cast = enemy.casting
+        #print enemy.can_use_ability(11)
+        #print enemy.in_ability_range_of(char, gameMap, 11)
         if cast is not None:
             target = cast["TargetId"]
-            print cast["AbilityId"]
-            print enemy.can_use_ability(cast["AbilityId"])
-            print char.id == target
-            if enemy.can_use_ability(cast["AbilityId"]) and char.id == target:
-                    if cast['CurrentCastTime'] == 0:
-                        print "dodging"
+            # print cast["AbilityId"]
+            # print enemy.can_use_ability(cast["AbilityId"])
+            # print char.id == target
+            if enemy.can_use_ability(cast["AbilityId"]) and char.id == target and cast['CurrentCastTime'] == 0:
+                        #print "dodging"
                         return True
+            #backstab anticipationenemy.in_ability_range_of(char, gameMap, 11)
+        #if enemy.can_use_ability(11) and enemy.in_ability_range_of(char, gameMap, 11):
+        #    return True
     return False
+
 
 
     # Main method
