@@ -27,7 +27,7 @@ def initialResponse():
                 {"CharacterName": "char1",
                  "ClassId": "Sorcerer"},
                 {"CharacterName": "char2",
-                 "ClassId": "Sorcerer"},
+                 "ClassId": "Druid"},
                 {"CharacterName": "char3",
                  "ClassId": "Paladin"},
             ]}
@@ -68,7 +68,7 @@ def processTurn(serverResponse):
       if character.name == "char1":
         action = sorcMove(character,myteam, enemyteam, target)
       elif character.name == "char2":
-        action = sorcMove(character,myteam, enemyteam, target)
+        action = druidMove(character,myteam, enemyteam, target)
       elif character.name == "char3":
         action = paly1Move(character,myteam, enemyteam, target)
       else:
@@ -126,7 +126,42 @@ def paly1Move(char, myteam, enemyteam, target):
 
 def paly2Move(char, myteam, enemyteam, target):
   return palyMove(char, myteam, enemyteam, target, target)
+
 def palyMove(char, myteam, enemyteam, target, stunTarget):
+  global turn
+  action = { "Action": "Attack",
+      "CharacterId": char.id,
+      "TargetId": target.id
+      }
+  if char.casting:
+    return None
+  elif turn==1:
+    return None
+  elif turn<5:
+    return action
+  elif turn ==5:
+    action["Action"]="Cast"
+    action["TargetId"]=myteam[0].id #make this better to target sorcer
+    action["AbilityId"]=3 #cutting for power
+    return action
+  elif char.can_use_ability(14) and stunTarget:
+    #do good stunning
+    action["Action"]="Cast"
+    action["TargetId"]=stunTarget.id #make this better to target sorcer
+    action["AbilityId"]=14 #cutting for power
+    return action 
+  elif char.in_range_of(target, gameMap):
+    return action;
+  else:
+    action["Action"]="Move"
+    return action
+
+
+
+  #logic goes here
+  return action
+
+def palyMove(char, myteam, enemyteam, target, rootTarget):
   global turn
   action = { "Action": "Attack",
       "CharacterId": char.id,

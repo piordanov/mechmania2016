@@ -58,16 +58,20 @@ def processTurn(serverResponse):
 
     # Choose a target
     target = chooseTarget(enemyteam); 
-    if target:
-      for character in myteam:
-	if character.name == "char1":
-	  actions.append(char1Move(character,myteam, enemyteam,target))
-	elif character.name == "char2":
-	  actions.append(char1Move(character,myteam, enemyteam,target))
-	elif character.name == "char3":
-	  actions.append(char3Move(character,myteam, enemyteam,target))
-	else:
-	  print "WE FUCKED UP->_>P>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+    # Choose a target
+    for character in myteam:
+      action=None
+      if character.name == "char1":
+        action = char1Move(character,myteam, enemyteam, target)
+      elif character.name == "char2":
+        action = char2Move(character,myteam, enemyteam, target)
+      elif character.name == "char3":
+        action = char3Move(character,myteam, enemyteam, target)
+      else:
+        print "WE FUCKED UP->_>P>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+
+      if action:
+	actions.append(action)
     # If we found a target
     # Send actions to the server
     return {
@@ -91,6 +95,12 @@ def chooseTarget(enemyteam):
 
 
 def char1Move(char, myteam, enemyteam, target):
+  return warriorMove(char, myteam, enemyteam, target, target);
+
+def char2Move(char, myteam, enemyteam, target):
+  return warriorMove(char, myteam, enemyteam, target, None);
+
+def warriorMove(char, myteam, enemyteam, target, stunTarget):
   action = { "Action": "Attack",
       "CharacterId": char.id,
       "TargetId": target.id
@@ -99,19 +109,11 @@ def char1Move(char, myteam, enemyteam, target):
   if not char.in_range_of(target, gameMap):
     action["Action"]= "Move"
     action["Location"]= target.id
-  elif char.can_use_ability(11, ret=False) and char.in_ability_range_of(target, gameMap, 11, ret=False):
+  elif stunTarget and char.can_use_ability(1) and char.in_ability_range_of(stunTarget, gameMap, 1):
+    print "smite"
     action["Action"]="Cast"
-    action["AbilityId"]=int(11)
-  if is_dodgeable_attack(char, enemyteam):
-    action = get_dodge_action(char)
-  #logic goes here
-  return action
-
-def char2Move(char, myteam, enemyteam, target):
-  action = { "Action": "Attack",
-      "CharacterId": char.id,
-      "TargetId": target.id
-      }
+    action["AbilityId"]=1
+    action["TargetId"]=stunTarget.id
   if is_dodgeable_attack(char, enemyteam):
     action = get_dodge_action(char)
   #logic goes here

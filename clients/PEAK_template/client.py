@@ -73,7 +73,6 @@ def processTurn(serverResponse):
       else:
         print "WE FUCKED UP->_>P>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 
-
       if action:
 	actions.append(action)
 
