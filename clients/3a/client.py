@@ -16,7 +16,7 @@ gameMap = GameMap()
 turn = 0
 
 # --------------------------- SET THIS IS UP -------------------------
-teamName = "Test"
+teamName = "3a"
 # ---------------------------------------------------------------------
 
 # Set initial connection data

@@ -16,7 +16,7 @@ gameMap = GameMap()
 turn = 0
 
 # --------------------------- SET THIS IS UP -------------------------
-teamName = "Test"
+teamName = "3optimize"
 # ---------------------------------------------------------------------
 
 # Set initial connection data
@@ -102,7 +102,8 @@ def char1Move(char, myteam, enemyteam, target):
   elif char.can_use_ability(11, ret=False) and char.in_ability_range_of(target, gameMap, 11, ret=False):
     action["Action"]="Cast"
     action["AbilityId"]=int(11)
-
+  if is_dodgeable_attack(char, enemyteam):
+    action = get_dodge_action(char)
   #logic goes here
   return action
 
@@ -111,7 +112,8 @@ def char2Move(char, myteam, enemyteam, target):
       "CharacterId": char.id,
       "TargetId": target.id
       }
-
+  if is_dodgeable_attack(char, enemyteam):
+    action = get_dodge_action(char)
   #logic goes here
   return action
 
@@ -121,7 +123,7 @@ def char3Move(char, myteam, enemyteam, target):
       "CharacterId": char.id,
       "TargetId": target.id
       }
-#set up shit to run away
+
   if turn==0:
     return action
 
@@ -129,18 +131,53 @@ def char3Move(char, myteam, enemyteam, target):
     pass #sprint
   if not char.in_range_of(target, gameMap):
     action["Action"]= "Move"
-    action["Location"]= target.id
+    action["TargetId"]= target.id
 
-
+  if is_dodgeable_attack(char, enemyteam):
+    action = get_dodge_action(char)
   #logic goes here
   return action
 
+def get_dodge_action(char):
+    posbelow = posabove = posleft = posright = selectPosition = list(char.position)
+    print tuple(char.position)
+    posbelow[1] -= 1
+    posabove[1] += 1
+    posleft[0] -= 1
+    posright[0] += 1
+    if gameMap.is_inbounds(posbelow):
+        selectPosition = posbelow
+    elif gameMap.is_inbounds(posleft):
+        selectPosition = posleft
+    elif gameMap.is_inbounds(posright):
+        selectPosition = posright
+    elif gameMap.is_inbounds(posabove):
+        selectPosition = posabove
 
-def detect_dodgeable_attack(char, enemyteam):
+    selectPosition = tuple(selectPosition)
+
+    return {"Action": "Move",
+              "CharacterId": char.id,
+              "Location": selectPosition
+              }
+
+
+def is_dodgeable_attack(char, enemyteam):
     for enemy in enemyteam:
-        if enemy.casting is not None:
-            target = enemy.casting.targetid
-# Main method
+        cast = enemy.casting
+        if cast is not None:
+            target = cast["TargetId"]
+            print cast["AbilityId"]
+            print enemy.can_use_ability(cast["AbilityId"])
+            print char.id == target
+            if enemy.can_use_ability(cast["AbilityId"]) and char.id == target:
+                    if cast['CurrentCastTime'] == 0:
+                        print "dodging"
+                        return True
+    return False
+
+
+    # Main method
 # @competitors DO NOT MODIFY
 if __name__ == "__main__":
     # Config
