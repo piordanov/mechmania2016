@@ -13,10 +13,10 @@ from src.game.gamemap import *
 
 # Game map that you can use to query 
 gameMap = GameMap()
-turn = 0
 
 # --------------------------- SET THIS IS UP -------------------------
-teamName = "wwa"
+teamName = "PEAK"
+turn = 0
 # ---------------------------------------------------------------------
 
 # Set initial connection data
@@ -25,20 +25,20 @@ def initialResponse():
     return {'TeamName': teamName,
             'Characters': [
                 {"CharacterName": "char1",
-                 "ClassId": "Warrior"},
+                 "ClassId": "Assassin"},
                 {"CharacterName": "char2",
-                 "ClassId": "Warrior"},
+                 "ClassId": "Assassin"},
                 {"CharacterName": "char3",
-                 "ClassId": "Archer"},
+                 "ClassId": "Assassin"},
             ]}
 # ---------------------------------------------------------------------
 
 # Determine actions to take on a given turn, given the server response
 def processTurn(serverResponse):
-# --------------------------- CHANGE THIS SECTION -------------------------
-    # Setup helper variables
     global turn
     turn+=1
+# --------------------------- CHANGE THIS SECTION -------------------------
+    # Setup helper variables
     actions = []
     myteam = []
     enemyteam = []
@@ -57,21 +57,23 @@ def processTurn(serverResponse):
 # ------------------ You shouldn't change above but you can ---------------
 
     # Choose a target
-    target = chooseTarget(enemyteam); 
-    # Choose a target
+    target=chooseTarget(enemyteam)
     for character in myteam:
       action=None
       if character.name == "char1":
-        action = char1Move(character,myteam, enemyteam, target)
+        action = assMove(character,myteam, enemyteam, target)
       elif character.name == "char2":
-        action = char2Move(character,myteam, enemyteam, target)
+        action = assMove(character,myteam, enemyteam, target)
       elif character.name == "char3":
-        action = char3Move(character,myteam, enemyteam, target)
+        action = assMove(character,myteam, enemyteam, target)
       else:
         print "WE FUCKED UP->_>P>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 
       if action:
 	actions.append(action)
+
+
+
     # If we found a target
     # Send actions to the server
     return {
@@ -79,7 +81,6 @@ def processTurn(serverResponse):
         'Actions': actions
     }
 # ---------------------------------------------------------------------
-
 def chooseTarget(enemyteam):
     target = enemyteam[0]
     for character in enemyteam:
@@ -94,96 +95,43 @@ def chooseTarget(enemyteam):
     return target
 
 
-def char1Move(char, myteam, enemyteam, target):
-  return warriorMove(char, myteam, enemyteam, target, target);
-
-def char2Move(char, myteam, enemyteam, target):
-  return warriorMove(char, myteam, enemyteam, target, None);
-
-def warriorMove(char, myteam, enemyteam, target, stunTarget):
-  action = { "Action": "Attack",
-      "CharacterId": char.id,
-      "TargetId": target.id
-      }
-
-  if not char.in_range_of(target, gameMap):
-    action["Action"]= "Move"
-    action["Location"]= target.id
-  elif stunTarget and char.can_use_ability(1) and char.in_ability_range_of(stunTarget, gameMap, 1):
-    print "smite"
-    action["Action"]="Cast"
-    action["AbilityId"]=1
-    action["TargetId"]=stunTarget.id
-  if is_dodgeable_attack(char, enemyteam):
-    action = get_dodge_action(char)
-  #logic goes here
-  return action
-
-def char3Move(char, myteam, enemyteam, target):
+def assMove(char, myteam, enemyteam, target):
   global turn
   action = { "Action": "Attack",
       "CharacterId": char.id,
       "TargetId": target.id
       }
+  dist = abs(myteam[0].position[0]-enemyteam[0].position[0]) + abs(myteam[0].position[1]-enemyteam[0].position[1])
 
-  if turn==0:
+  if should_break(char):
+    action["Action"]="Cast"
+    action["AbilityId"]=0
+  elif char.in_ability_range_of(target, gameMap, 11) and char.can_use_ability(11):
+    action["Action"]="Cast"
+    action["AbilityId"]=11
+    return action
+  elif char.in_range_of(target, gameMap):
+    return action
+  elif dist==3 or dist == 4:
+    action["Action"]="Cast"
+    action["AbilityId"]=12
+  else:
+    action["Action"]="Move"
     return action
 
-  if char.can_use_ability(12, ret=False) and char.in_ability_range_of(target, gameMap, 12, ret=False):
-    pass #sprint
-  if not char.in_range_of(target, gameMap):
-    action["Action"]= "Move"
-    action["TargetId"]= target.id
 
-  if is_dodgeable_attack(char, enemyteam):
-    action = get_dodge_action(char)
+def should_break(char):
+  attr = char.attributes
+  if attr.get_attribute("Stunned")<0:
+    return True
+  return False
+
+    
+
   #logic goes here
   return action
 
-def get_dodge_action(char):
-    selectPosition = None
-    print "From: %s" % (char.position,)
-    posbelow = tuple([char.position[0], char.position[1] - 1])
-    posabove = tuple([char.position[0], char.position[1] + 1])
-    posleft = tuple([char.position[0] - 1, char.position[1]])
-    posright = tuple([char.position[0] + 1, char.position[1]])
-    if gameMap.is_inbounds(posbelow):
-        selectPosition = posbelow
-    elif gameMap.is_inbounds(posleft):
-        selectPosition = posleft
-    elif gameMap.is_inbounds(posright):
-        selectPosition = posright
-    elif gameMap.is_inbounds(posabove):
-        selectPosition = posabove
-    selectPosition = tuple(selectPosition)
-    print "To: %s" % (selectPosition,)
-
-    return {"Action": "Move",
-            "CharacterId": char.id,
-            "Location": selectPosition
-            }
-
-
-def is_dodgeable_attack(char, enemyteam):
-    for enemy in enemyteam:
-        cast = enemy.casting
-        #print enemy.can_use_ability(11)
-        #print enemy.in_ability_range_of(char, gameMap, 11)
-        if cast is not None:
-            target = cast["TargetId"]
-            # print cast["AbilityId"]
-            # print enemy.can_use_ability(cast["AbilityId"])
-            # print char.id == target
-            if enemy.can_use_ability(cast["AbilityId"]) and char.id == target and cast['CurrentCastTime'] == 0:
-                        #print "dodging"
-                        return True
-            #backstab anticipationenemy.in_ability_range_of(char, gameMap, 11)
-        #if enemy.can_use_ability(11) and enemy.in_ability_range_of(char, gameMap, 11):
-        #    return True
-    return False
-
-
-    # Main method
+# Main method
 # @competitors DO NOT MODIFY
 if __name__ == "__main__":
     # Config
