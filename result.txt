@@ -1,0 +1,69 @@
+/Users/admin/Documents
+Creating server with 2 players, Running server on port 1337
+
+Writing log to gamerunner/log.json
+Starting Game
+connecting ...
+sockets connected ...
+Finished turn 0
+Finished turn 1
+Finished turn 2
+Finished turn 3
+Finished turn 4
+Finished turn 5
+Finished turn 6
+Finished turn 7
+Finished turn 8
+Finished turn 9
+Finished turn 10
+Finished turn 11
+Finished turn 12
+Finished turn 13
+Finished turn 14
+Finished turn 15
+Finished turn 16
+Finished turn 17
+Finished turn 18
+Finished turn 19
+Finished turn 20
+Finished turn 21
+Finished turn 22
+Finished turn 23
+Finished turn 24
+Finished turn 25
+Finished turn 26
+Finished turn 27
+Finished turn 28
+Finished turn 29
+Finished turn 30
+Finished turn 31
+Finished turn 32
+Finished turn 33
+Finished turn 34
+Finished turn 35
+Finished turn 36
+Finished turn 37
+Finished turn 38
+Finished turn 39
+Finished turn 40
+Finished turn 41
+Finished turn 42
+Finished turn 43
+Finished turn 44
+Finished turn 45
+Finished turn 46
+Finished turn 47
+Finished turn 48
+Finished turn 49
+Finished turn 50
+Finished turn 51
+Finished turn 52
+Finished turn 53
+Finished turn 54
+Finished turn 55
+Finished turn 56
+Finished turn 57
+Finished turn 58
+Finished turn 59
+Team 2 Won
+Game finished - writing log to file
