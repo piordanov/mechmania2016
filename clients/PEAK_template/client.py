@@ -75,6 +75,19 @@ def processTurn(serverResponse):
         'Actions': actions
     }
 # ---------------------------------------------------------------------
+def chooseTarget(enemyteam):
+    target = enemyteam[0]
+    for character in enemyteam:
+        if not character.is_dead():
+            target = character
+    targetHealth = target.attributes.get_attribute("Health")
+    for character in enemyteam:
+	cHealth = character.attributes.get_attribute("Health")
+        if not character.is_dead() and cHealth<targetHealth:
+            target = character
+	    targetHealth = cHealth
+    return target
+
 
 def char1Move(char, myteam, enemyteam):
   action = { "Action": "Attack",
