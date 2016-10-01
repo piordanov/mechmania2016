@@ -175,10 +175,18 @@ def find_stun_target(char, enemyteam):
     for enemy in enemyteam:
         if not enemy.is_dead() and not enemy.attributes.get_attribute("Stunned") \
                 and char.in_ability_range_of(enemy, gameMap, 1) and char.can_use_ability(1) and not stunned_this_round(enemy):
-            t_damage = enemy.attributes.get_attribute("Damage")
-            if t_damage > damage:
-                damage = t_damage
+
+            if enemy.can_use_ability(3):
                 target = enemy
+                break
+            elif enemy.id == "Archer":
+                target = enemy
+                break
+            else:
+                t_damage = enemy.attributes.get_attribute("Damage")
+                if t_damage > damage:
+                    damage = t_damage
+                    target = enemy
 
     if target is not None:
         applied_actions.append(target.id)
