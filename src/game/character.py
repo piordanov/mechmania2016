@@ -51,6 +51,7 @@ class Character(object):
         self.map = None
         self.target = None
         self.dead = False
+        self.actioned = False
 
     def init(self, json, x, y):
         error = ""
@@ -127,6 +128,8 @@ class Character(object):
         if self.is_dead():
             self.dead = True
 
+        self.actioned = False
+
 # ---------------------- Helper Functions -------------------
     def is_dead(self):
         return self.attributes.get_attribute("Health") <= 0
@@ -155,6 +158,7 @@ class Character(object):
                 raise OutOfRangeException
             else:
                 return False
+        return True
 
     def can_use_ability(self, ability_id, ret=False):
         """ Checks if a character can use an ability (must have that ability)
@@ -325,7 +329,7 @@ class Character(object):
         if movement_speed >= len(path) - 1:
             new_loc = path[-1]
         else:
-            new_loc = path[movement_speed + 1]
+            new_loc = path[movement_speed]
 
         self.position = new_loc
         self.casting = None
@@ -383,7 +387,8 @@ class Character(object):
             if not self.attributes.serialize(json['Attributes']):
                 return False
         except KeyError as ex:
-            print("Failed to serialize: " + str(ex))
+
+            ("Failed to serialize: " + str(ex))
             return False
         return True
 
