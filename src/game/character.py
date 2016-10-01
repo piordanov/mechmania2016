@@ -213,7 +213,7 @@ class Character(object):
         if cast_time > 0:
             self.map = map
             self.target = target
-            self.casting = {"AbilityId": ability_id, "CurrentCastTime": cast_time}
+            self.casting = {"AbilityId": ability_id, "CurrentCastTime": cast_time, "TargetId": self.target}
         else:
             self.cast_ability(ability_id, target, map)
 
@@ -354,7 +354,7 @@ class Character(object):
         if movement_speed >= len(path) - 1:
             new_loc = path[-1]
         else:
-            new_loc = path[movement_speed + 1]
+            new_loc = path[movement_speed]
 
         self.position = new_loc
         self.casting = None
