@@ -13,7 +13,7 @@ from src.game.gamemap import *
 
 # Game map that you can use to query 
 gameMap = GameMap()
-turn = 0;
+turn = 0
 
 # --------------------------- SET THIS IS UP -------------------------
 teamName = "Test"
@@ -37,6 +37,7 @@ def initialResponse():
 def processTurn(serverResponse):
 # --------------------------- CHANGE THIS SECTION -------------------------
     # Setup helper variables
+    global turn
     turn+=1
     actions = []
     myteam = []
@@ -56,11 +57,7 @@ def processTurn(serverResponse):
 # ------------------ You shouldn't change above but you can ---------------
 
     # Choose a target
-    target = None
-    for character in enemyteam:
-        if not character.is_dead():
-            target = character
-            break
+    target = chooseTarget(enemyteam); 
     if target:
       for character in myteam:
 	if character.name == "char1":
@@ -79,6 +76,20 @@ def processTurn(serverResponse):
     }
 # ---------------------------------------------------------------------
 
+def chooseTarget(enemyteam):
+    target = enemyteam[0]
+    for character in enemyteam:
+        if not character.is_dead():
+            target = character
+    targetHealth = target.attributes.get_attribute("Health")
+    for character in enemyteam:
+	cHealth = character.attributes.get_attribute("Health")
+        if not character.is_dead() and cHealth<targetHealth:
+            target = character
+	    targetHealth = cHealth
+    return target
+
+
 def char1Move(char, myteam, enemyteam, target):
   action = { "Action": "Attack",
       "CharacterId": char.id,
@@ -88,12 +99,11 @@ def char1Move(char, myteam, enemyteam, target):
   if not char.in_range_of(target, gameMap):
     action["Action"]= "Move"
     action["Location"]= target.id
-  elif char.can_use_ability(unicode(11), ret=False) and char.in_ability_range_of(target, gameMap, 11, ret=True):
+  elif char.can_use_ability(11, ret=False) and char.in_ability_range_of(target, gameMap, 11, ret=False):
     action["Action"]="Cast"
-    action["AbilityID"]=int(11)
+    action["AbilityId"]=int(11)
 
   #logic goes here
-  print action
   return action
 
 def char2Move(char, myteam, enemyteam, target):
@@ -106,18 +116,20 @@ def char2Move(char, myteam, enemyteam, target):
   return action
 
 def char3Move(char, myteam, enemyteam, target):
+  global turn
   action = { "Action": "Attack",
       "CharacterId": char.id,
       "TargetId": target.id
       }
-
-  if turns==0:
+#set up shit to run away
+  if turn==0:
     return action
 
+  if char.can_use_ability(12, ret=False) and char.in_ability_range_of(target, gameMap, 12, ret=False):
+    pass #sprint
   if not char.in_range_of(target, gameMap):
     action["Action"]= "Move"
     action["Location"]= target.id
-
 
 
   #logic goes here

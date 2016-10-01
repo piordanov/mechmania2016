@@ -170,6 +170,8 @@ class Character(object):
         # Does this character actually have the ability?
         if ability_id not in self.abilities:
             if ret:
+	        print ability_id
+		print self.abilities
                 raise InvalidAbilityIdException
             else:
                 return False
