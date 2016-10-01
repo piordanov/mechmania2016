@@ -23,12 +23,12 @@ def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
     return {'TeamName': teamName,
             'Characters': [
-                {"CharacterName": "char1",
-                 "ClassId": "Druid"},
-                {"CharacterName": "char2",
-                 "ClassId": "Archer"},
-                {"CharacterName": "char3",
+                {"CharacterName": "Warrior1",
                  "ClassId": "Warrior"},
+                {"CharacterName": "Warrior2",
+                 "ClassId": "Warrior"},
+                {"CharacterName": "Warrior3",
+                 "ClassId": "Warrior"}
             ]}
 # ---------------------------------------------------------------------
 
@@ -59,16 +59,44 @@ def processTurn(serverResponse):
         if not character.is_dead():
             target = character
             break
-    for character in myteam:
-      if character.name == "char1":
-        actions.append(char1Move(character,myteam, enemyteam))
-      elif character.name == "char2":
-        actions.append(char2Move(character,myteam, enemyteam))
-      elif character.name == "char3":
-        actions.append(char3Move(character,myteam, enemyteam))
-      else:
-        print "WE FUCKED UP->_>P>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+
     # If we found a target
+    if target:
+        for character in myteam:
+            # If I am in range, either move towards target
+            if character.in_range_of(target, gameMap):
+                # Am I already trying to cast something?
+                if character.casting is None:
+                    cast = False
+                    for abilityId, cooldown in character.abilities.items():
+                        # Do I have an ability not on cooldown
+                        if cooldown == 0:
+                            # If I can, then cast it
+                            ability = game_consts.abilitiesList[int(abilityId)]
+                            # Get ability
+                            actions.append({
+                                "Action": "Cast",
+                                "CharacterId": character.id,
+                                # Am I buffing or debuffing? If buffing, target myself
+                                "TargetId": target.id if ability["StatChanges"][0]["Change"] < 0 else character.id,
+                                "AbilityId": int(abilityId)
+                            })
+                            cast = True
+                            break
+                    # Was I able to cast something? Either wise attack
+                    if not cast:
+                        actions.append({
+                            "Action": "Attack",
+                            "CharacterId": character.id,
+                            "TargetId": target.id,
+                        })
+            else: # Not in range, move towards
+                actions.append({
+                    "Action": "Move",
+                    "CharacterId": character.id,
+                    "TargetId": target.id,
+                })
+
     # Send actions to the server
     return {
         'TeamName': teamName,
@@ -76,32 +104,6 @@ def processTurn(serverResponse):
     }
 # ---------------------------------------------------------------------
 
-def char1Move(char, myteam, enemyteam):
-  action = { "Action": "Attack",
-      "CharacterId": char.id,
-      "TargetId": enemyteam[0].id
-      }
-
-  #logic goes here
-  return action
-
-def char2Move(char, myteam, enemyteam):
-  action = { "Action": "Attack",
-      "CharacterId": char.id,
-      "TargetId": enemyteam[0].id
-      }
-
-  #logic goes here
-  return action
-
-def char3Move(char, myteam, enemyteam):
-  action = { "Action": "Attack",
-      "CharacterId": char.id,
-      "TargetId": enemyteam[0].id
-      }
-
-  #logic goes here
-  return action
 # Main method
 # @competitors DO NOT MODIFY
 if __name__ == "__main__":

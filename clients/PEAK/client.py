@@ -23,12 +23,12 @@ def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
     return {'TeamName': teamName,
             'Characters': [
+                {"CharacterName": "Assassin1",
+                 "ClassId": "Assassin"},
+                {"CharacterName": "Assassin2",
+                 "ClassId": "Archer"},
                 {"CharacterName": "Druid",
                  "ClassId": "Druid"},
-                {"CharacterName": "Archer",
-                 "ClassId": "Archer"},
-                {"CharacterName": "Warrior",
-                 "ClassId": "Warrior"},
             ]}
 # ---------------------------------------------------------------------
 
@@ -54,6 +54,8 @@ def processTurn(serverResponse):
 # ------------------ You shouldn't change above but you can ---------------
 
     # Choose a target
+
+    weaktarget = find_weakest_member(enemyteam)
     target = None
     for character in enemyteam:
         if not character.is_dead():
@@ -102,6 +104,15 @@ def processTurn(serverResponse):
         'TeamName': teamName,
         'Actions': actions
     }
+
+def find_weakest_member(characters):
+    min = 2000
+    result = None
+    for enemy in characters:
+        if enemy.attributes.get_attribute("health") < min:
+            min = enemy.attributes.get_attribute("health")
+            result = enemy
+    return result
 # ---------------------------------------------------------------------
 
 # Main method

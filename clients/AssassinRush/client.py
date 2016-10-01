@@ -102,6 +102,19 @@ def char3Move(char, myteam, enemyteam):
 
   #logic goes here
   return action
+
+def find_weakest_member(characters):
+    min = 2000
+    result = None
+    for enemy in characters:
+        if enemy.attributes.get_attribute("health") < min:
+            min = enemy.attributes.get_attribute("health")
+            result = enemy
+    return result
+
+def can_backstab(character):
+    return character.abilities
+
 # Main method
 # @competitors DO NOT MODIFY
 if __name__ == "__main__":
