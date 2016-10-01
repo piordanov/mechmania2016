@@ -65,5 +65,8 @@ Finished turn 56
 Finished turn 57
 Finished turn 58
 Finished turn 59
+Finished turn 60
+Finished turn 61
+Finished turn 62
 Team 2 Won
 Game finished - writing log to file
