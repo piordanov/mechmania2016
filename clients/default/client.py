@@ -24,11 +24,11 @@ def initialResponse():
     return {'TeamName': teamName,
             'Characters': [
                 {"CharacterName": "Druid",
-                 "ClassId": "Druid"},
+                 "ClassId": "Wizard"},
                 {"CharacterName": "Archer",
-                 "ClassId": "Archer"},
+                 "ClassId": "Druid"},
                 {"CharacterName": "Warrior",
-                 "ClassId": "Warrior"},
+                 "ClassId": "Wizard"},
             ]}
 # ---------------------------------------------------------------------
 

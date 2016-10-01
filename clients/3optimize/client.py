@@ -24,11 +24,11 @@ def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
     return {'TeamName': teamName,
             'Characters': [
-                {"CharacterName": "char1",
+                {"CharacterName": "Assassin",
                  "ClassId": "Assassin"},
-                {"CharacterName": "char2",
+                {"CharacterName": "Assassin",
                  "ClassId": "Assassin"},
-                {"CharacterName": "char3",
+                {"CharacterName": "Archer",
                  "ClassId": "Archer"},
             ]}
 # ---------------------------------------------------------------------
@@ -57,19 +57,18 @@ def processTurn(serverResponse):
 # ------------------ You shouldn't change above but you can ---------------
 
     # Choose a target
-    target = chooseTarget(enemyteam); 
+    target = chooseTarget(enemyteam)
     if target:
       for character in myteam:
-	if character.name == "char1":
-	  actions.append(char1Move(character,myteam, enemyteam,target))
-	elif character.name == "char2":
-	  actions.append(char1Move(character,myteam, enemyteam,target))
-	elif character.name == "char3":
-	  actions.append(char3Move(character,myteam, enemyteam,target))
-	else:
-	  print "WE FUCKED UP->_>P>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-    # If we found a target
-    # Send actions to the server
+        action = None
+        if character.name == "Assassin":
+          action = charAssassinMove(character,myteam, enemyteam,target)
+        elif character.name == "Archer":
+         action = charArcherMove(character,myteam, enemyteam,target)
+        else:
+          print "WE FUCKED UP->_>P>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+        if action:
+            actions.append(action)
     return {
         'TeamName': teamName,
         'Actions': actions
@@ -78,65 +77,78 @@ def processTurn(serverResponse):
 
 def chooseTarget(enemyteam):
     target = enemyteam[0]
+    minpos = (10,10)
     for character in enemyteam:
         if not character.is_dead():
             target = character
     targetHealth = target.attributes.get_attribute("Health")
     for character in enemyteam:
-	cHealth = character.attributes.get_attribute("Health")
+        cHealth = character.attributes.get_attribute("Health")
         if not character.is_dead() and cHealth<targetHealth:
             target = character
-	    targetHealth = cHealth
+        targetHealth = cHealth
     return target
 
 
-def char1Move(char, myteam, enemyteam, target):
-  action = { "Action": "Attack",
+def charAssassinMove(char, myteam, enemyteam, target):
+  global turn
+  action = { "Action": "Move",
       "CharacterId": char.id,
-      "TargetId": target.id
+      "Location": char.position
       }
 
-  if not char.in_range_of(target, gameMap):
-    action["Action"]= "Move"
-    action["Location"]= target.id
-  elif char.can_use_ability(11, ret=False) and char.in_ability_range_of(target, gameMap, 11, ret=False):
+  if char.casting is not None or char.is_dead():
+      return None
+
+  if turn == 1 and char.position == tuple([0, 0]):
+    action["Action"] = "Move"
+    action["Location"] = tuple([1,0])
+    print action["Location"]
+
+  elif turn == 1 and char.position == tuple([gameMap.height-1,gameMap.height-1]):
+    action["Action"] = "Move"
+    action["Location"] = tuple([gameMap.height-2,gameMap.height-1])
+    print action["Location"]
+
+  elif char.can_use_ability(11, ret=False) and char.in_ability_range_of(target, gameMap, 11, ret=False) and char.casting is None:
     action["Action"]="Cast"
     action["AbilityId"]=int(11)
-  if is_dodgeable_attack(char, enemyteam):
-    action = get_dodge_action(char)
-  #logic goes here
-  return action
-
-def char2Move(char, myteam, enemyteam, target):
-  action = { "Action": "Attack",
-      "CharacterId": char.id,
-      "TargetId": target.id
-      }
-  if is_dodgeable_attack(char, enemyteam):
-    action = get_dodge_action(char)
-  #logic goes here
-  return action
-
-def char3Move(char, myteam, enemyteam, target):
-  global turn
-  action = { "Action": "Attack",
-      "CharacterId": char.id,
-      "TargetId": target.id
-      }
-
-  if turn==0:
-    return action
-
-  if char.can_use_ability(12, ret=False) and char.in_ability_range_of(target, gameMap, 12, ret=False):
-    pass #sprint
-  if not char.in_range_of(target, gameMap):
-    action["Action"]= "Move"
     action["TargetId"]= target.id
 
-  if is_dodgeable_attack(char, enemyteam):
-    action = get_dodge_action(char)
-    print action
+
+  elif char.in_range_of(target, gameMap):
+    action["Action"] = "Attack"
+    action["TargetId"] = target.id
   #logic goes here
+  print action
+  return action
+
+def charArcherMove(char, myteam, enemyteam, target):
+  global turn
+  action = { "Action": "Move",
+      "CharacterId": char.id,
+      "Location": char.position
+      }
+
+  if turn == 0 and char.position == tuple([0,0]):
+    action["Action"] = "Move"
+    action["Location"] = tuple([1,0])
+
+  if turn == 0 and char.position == tuple([gameMap.height-1,gameMap.height-1]):
+    action["Action"] = "Move"
+    action["Location"] = tuple([gameMap.height-2,gameMap.height-1])
+
+  if char.can_use_ability(2, ret=False) and char.in_ability_range_of(target, gameMap, 2, ret=False) :
+    action["Action"]="Cast"
+    action["AbilityId"]=int(2)
+    action["TargetId"]= target.id
+
+  elif char.in_range_of(target, gameMap):
+    action["Action"] = "Attack"
+    action["TargetId"] = target.id
+
+  print action
+
   return action
 
 def get_dodge_action(char):
