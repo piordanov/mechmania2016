@@ -24,11 +24,11 @@ def initialResponse():
     return {'TeamName': teamName,
             'Characters': [
                 {"CharacterName": "char1",
-                 "ClassId": "Druid"},
+                 "ClassId": "Assassin"},
                 {"CharacterName": "char2",
-                 "ClassId": "Archer"},
+                 "ClassId": "Assassin"},
                 {"CharacterName": "char3",
-                 "ClassId": "Warrior"},
+                 "ClassId": "Assassin"},
             ]}
 # ---------------------------------------------------------------------
 
@@ -53,21 +53,15 @@ def processTurn(serverResponse):
                 enemyteam.append(character)
 # ------------------ You shouldn't change above but you can ---------------
 
-    # Choose a target
-    target = None
-    for character in enemyteam:
-        if not character.is_dead():
-            target = character
-            break
     for character in myteam:
-      if character.name == "char1":
-        actions.append(char1Move(character,myteam, enemyteam))
-      elif character.name == "char2":
-        actions.append(char2Move(character,myteam, enemyteam))
-      elif character.name == "char3":
-        actions.append(char3Move(character,myteam, enemyteam))
-      else:
-        print "WE FUCKED UP->_>P>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+        if character.name == "char1":
+            actions.append(char1Move(character,myteam, enemyteam))
+        elif character.name == "char2":
+            actions.append(char2Move(character,myteam, enemyteam))
+        elif character.name == "char3":
+            actions.append(char3Move(character,myteam, enemyteam))
+        else:
+            print "WE FUCKED UP->_>P>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
     # If we found a target
     # Send actions to the server
     return {
@@ -77,31 +71,77 @@ def processTurn(serverResponse):
 # ---------------------------------------------------------------------
 
 def char1Move(char, myteam, enemyteam):
-  action = { "Action": "Attack",
-      "CharacterId": char.id,
-      "TargetId": enemyteam[0].id
-      }
+    target = find_prioritized_enemy(enemyteam)
+    action = None
+    if target:
+        for character in myteam:
+            # If I am in range, either move towards target
+            if character.in_range_of(target, gameMap):
+                # Am I already trying to cast something?
+                if character.casting is None:
+                    cast = False
+                    for abilityId, cooldown in character.abilities.items():
+                        # Do I have an ability not on cooldown
+                        if cooldown == 0:
+                            # If I can, then cast it
+                            ability = game_consts.abilitiesList[int(abilityId)]
+                            # Get ability
+                            action = {
+                                "Action": "Cast",
+                                "CharacterId": char.id,
+                                # Am I buffing or debuffing? If buffing, target myself
+                                "TargetId": target.id if ability["StatChanges"][0]["Change"] < 0 else character.id,
+                                "AbilityId": int(abilityId)
+                            }
+                            cast = True
+                            break
+                    # Was I able to cast something? Either wise attack
+                    if not cast:
+                        action = {
+                            "Action": "Attack",
+                            "CharacterId": character.id,
+                            "TargetId": target.id,
+                        }
+            else: # Not in range, move towards
+                action = {
+                    "Action": "Move",
+                    "CharacterId": character.id,
+                    "TargetId": target.id,
+                }
+    else:
+        target = get_a_target(enemyteam)
+        action = {
+                "Action": "Move",
+                "CharacterId": char.id,
+                "TargetId": target.id,
+            }
+    return action
 
-  #logic goes here
-  return action
 
 def char2Move(char, myteam, enemyteam):
-  action = { "Action": "Attack",
-      "CharacterId": char.id,
-      "TargetId": enemyteam[0].id
-      }
+  action = char1Move(char, myteam, enemyteam)
 
   #logic goes here
   return action
 
 def char3Move(char, myteam, enemyteam):
-  action = { "Action": "Attack",
-      "CharacterId": char.id,
-      "TargetId": enemyteam[0].id
-      }
-
+  action = char1Move(char, myteam, enemyteam)
   #logic goes here
   return action
+
+def find_prioritized_enemy(characters):
+    #order these to choose enemies by the lowest valued enemy
+    priorities = ["Druid", "Enchanter", "Assassin", "Archer", "Sorcerer", "Wizard","Warrior", "Paladin"]
+    result = None
+
+    priority = len(priorities)
+    for char in characters:
+        if not char.is_dead():
+            currpriority = priorities.index(char.classId)
+            if priority < currpriority:
+                result = char
+                priority = currpriority
+    return result
 
 def find_weakest_member(characters):
     min = 2000
@@ -112,8 +152,13 @@ def find_weakest_member(characters):
             result = enemy
     return result
 
-def can_backstab(character):
-    return character.abilities
+def get_a_target(enemyteam):
+    target = None
+    for character in enemyteam:
+        if not character.is_dead():
+            target = character
+            break
+    return target
 
 # Main method
 # @competitors DO NOT MODIFY
