@@ -161,7 +161,7 @@ def palyMove(char, myteam, enemyteam, target, stunTarget):
   #logic goes here
   return action
 
-def palyMove(char, myteam, enemyteam, target, rootTarget):
+def sorMove(char, myteam, enemyteam, target, rootTarget):
   global turn
   action = { "Action": "Attack",
       "CharacterId": char.id,
@@ -173,17 +173,11 @@ def palyMove(char, myteam, enemyteam, target, rootTarget):
     return None
   elif turn<5:
     return action
-  elif turn ==5:
+  elif char.can_use_ability(10) and target:
     action["Action"]="Cast"
-    action["TargetId"]=myteam[0].id #make this better to target sorcer
-    action["AbilityId"]=3 #cutting for power
+    action["TargetId"]=target.id #make this better to target sorcer
+    action["AbilityId"]=10
     return action
-  elif char.can_use_ability(14) and stunTarget:
-    #do good stunning
-    action["Action"]="Cast"
-    action["TargetId"]=stunTarget.id #make this better to target sorcer
-    action["AbilityId"]=14 #cutting for power
-    return action 
   elif char.in_range_of(target, gameMap):
     return action;
   else:
