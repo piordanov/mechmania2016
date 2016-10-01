@@ -25,18 +25,18 @@ def initialResponse():
     return {'TeamName': teamName,
             'Characters': [
                 {"CharacterName": "char1",
-                 "ClassId": "Druid"},
+                 "ClassId": "Sorcerer"},
                 {"CharacterName": "char2",
-                 "ClassId": "Archer"},
+                 "ClassId": "Sorcerer"},
                 {"CharacterName": "char3",
-                 "ClassId": "Warrior"},
+                 "ClassId": "Paladin"},
             ]}
 # ---------------------------------------------------------------------
 
 # Determine actions to take on a given turn, given the server response
 def processTurn(serverResponse):
-  global turn
-  turn+=1
+    global turn
+    turn+=1
 # --------------------------- CHANGE THIS SECTION -------------------------
     # Setup helper variables
     actions = []
@@ -62,25 +62,22 @@ def processTurn(serverResponse):
         if not character.is_dead():
             target = character
             break
+   
     for character in myteam:
       action=None
       if character.name == "char1":
-        action = char1Move(character,myteam, enemyteam, target)
+        action = sorcMove(character,myteam, enemyteam, target)
       elif character.name == "char2":
-        action = char2Move(character,myteam, enemyteam, target)
+        action = sorcMove(character,myteam, enemyteam, target)
       elif character.name == "char3":
-        action = char3Move(character,myteam, enemyteam, target)
+        action = paly1Move(character,myteam, enemyteam, target)
       else:
         print "WE FUCKED UP->_>P>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-
-
       if action:
 	actions.append(action)
-
-
-
     # If we found a target
     # Send actions to the server
+    print actions
     return {
         'TeamName': teamName,
         'Actions': actions
@@ -100,29 +97,65 @@ def chooseTarget(enemyteam):
     return target
 
 
-def char1Move(char, myteam, enemyteam, target):
+def sorcMove(char, myteam, enemyteam, target):
+  global turn
   action = { "Action": "Attack",
       "CharacterId": char.id,
       "TargetId": enemyteam[0].id
       }
+  #predict when they are 3 away
+  if turn<3:
+    return None
+  elif turn<7:
+    print turn
+    action["Action"]="Cast"
+    action["TargetId"]=char.id
+    action["AbilityId"]=8 #cutting for power
+    return action
+
+  if not char.in_range_of(target, gameMap):
+    action["Action"]= "Move"
+    action["TargetId"]= target.id
 
   #logic goes here
   return action
 
-def char2Move(char, myteam, enemyteam, target):
+def paly1Move(char, myteam, enemyteam, target):
+  return palyMove(char, myteam, enemyteam, target, None)
+
+
+def paly2Move(char, myteam, enemyteam, target):
+  return palyMove(char, myteam, enemyteam, target, target)
+def palyMove(char, myteam, enemyteam, target, stunTarget):
+  global turn
   action = { "Action": "Attack",
       "CharacterId": char.id,
-      "TargetId": enemyteam[0].id
+      "TargetId": target.id
       }
+  if char.casting:
+    return None
+  elif turn==1:
+    return None
+  elif turn<5:
+    return action
+  elif turn ==5:
+    action["Action"]="Cast"
+    action["TargetId"]=myteam[0].id #make this better to target sorcer
+    action["AbilityId"]=3 #cutting for power
+    return action
+  elif char.can_use_ability(14) and stunTarget:
+    #do good stunning
+    action["Action"]="Cast"
+    action["TargetId"]=stunTarget.id #make this better to target sorcer
+    action["AbilityId"]=14 #cutting for power
+    return action 
+  elif char.in_range_of(target, gameMap):
+    return action;
+  else:
+    action["Action"]="Move"
+    return action
 
-  #logic goes here
-  return action
 
-def char3Move(char, myteam, enemyteam, target):
-  action = { "Action": "Attack",
-      "CharacterId": char.id,
-      "TargetId": enemyteam[0].id
-      }
 
   #logic goes here
   return action
