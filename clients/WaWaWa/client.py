@@ -113,7 +113,7 @@ def warriorMove(char, myteam, enemyteam, target):
   stun_target = find_stun_target(char, enemyteam)
   buff_self = choose_to_buff(char, enemyteam)
 
-  if buff_self:
+  if False: #buff_self and char.can_use_ability(15, ret=False):
       action["Action"] = "Cast"
       action["AbilityId"] = 15
       action["TargetId"] = char.id
@@ -133,8 +133,9 @@ def warriorMove(char, myteam, enemyteam, target):
 
 def choose_to_buff(char, enemies):
     for enemy in enemies:
-        dist = (char.position[0] - enemy.position[0]) / float((char.position[1] - enemy.position[1]))
-        if dist < 3:
+        dist = abs((char.position[0] - enemy.position[0]) + (char.position[1] - enemy.position[1]))
+        print dist
+        if dist < 3 and dist != 0:
             return True
     return False
 
