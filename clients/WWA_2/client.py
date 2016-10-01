@@ -144,12 +144,11 @@ def ArcherMove(char, myteam, enemyteam, target):
   return action
 
 def get_dodge_action(char):
-    posbelow = posabove = posleft = posright = selectPosition = list(char.position)
-    print tuple(char.position)
-    posbelow[1] -= 1
-    posabove[1] += 1
-    posleft[0] -= 1
-    posright[0] += 1
+    selectPosition = list(char.position)
+    posbelow = tuple([char.position[0], char.position[1] - 1])
+    posabove = tuple([char.position[0], char.position[1] + 1])
+    posleft = tuple([char.position[0] - 1, char.position[1]])
+    posright = tuple([char.position[0] + 1, char.position[1]])
     if gameMap.is_inbounds(posbelow):
         selectPosition = posbelow
     elif gameMap.is_inbounds(posleft):
@@ -207,9 +206,9 @@ def is_dodgeable_attack(char, enemyteam):
         cast = enemy.casting
         if cast is not None:
             target = cast["TargetId"]
-            print cast["AbilityId"]
-            print enemy.can_use_ability(cast["AbilityId"])
-            print char.id == target
+            #print cast["AbilityId"]
+            #print enemy.can_use_ability(cast["AbilityId"])
+            #print char.id == target
             if enemy.can_use_ability(cast["AbilityId"]) and char.id == target:
                     if cast['CurrentCastTime'] == 0:
                         print "dodging"
